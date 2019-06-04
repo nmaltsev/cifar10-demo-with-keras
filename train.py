@@ -1,14 +1,14 @@
 import numpy as np
 import cPickle as pickle
 
-from model import Model
+from model import createCifarCNN, createMNISTCNN, Trainer
 from prepare_data import load_data, load_train, predict
 from keras.utils import np_utils
 
 from configure import configureHardware
 
 if __name__ == '__main__':
-	configureHardware(num_cores=4, num_CPU=1, num_GPU=0)
+	configureHardware(num_cores=4, num_CPU=1, num_GPU=1)
 	
 	with open('data/image_norm_zca.pkl', 'rb') as f:
 		images = pickle.load(f)
@@ -26,12 +26,17 @@ if __name__ == '__main__':
 		valid_y = np_utils.to_categorical(valid_y)
 		test_y = labels['test']
 
-
-	model = Model('cifar1.model')
+	model = Trainer(
+		'cifar1.model', 
+		createCifarCNN(),
+		batch_size=32
+	)
 	print('[START train]')
+	print(train_x.shape)
 	model.set_train_data(train_x, train_y)
-	model.train(validation_data=(valid_x, valid_y))
+	# model.train(validation_data=(valid_x, valid_y))
+	model.train_gen(validation_data=(valid_x, valid_y))
 	model.save_m()
-	predict(model, test_x, test_y)
+	predict(model.model, test_x, test_y)
 	
 	

@@ -100,5 +100,6 @@ def main(dataset_path):
     
 
 if __name__ == '__main__':
-    dataset_path = '/root/tfplayground/datasets/cifar-10-batches-py'
+    # ~ dataset_path = '/root/tfplayground/datasets/cifar-10-batches-py'
+    dataset_path = '/media/cluster_files/dev/cifar/cifar-10-batches-py'
     main(dataset_path)

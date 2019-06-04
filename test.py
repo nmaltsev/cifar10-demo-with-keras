@@ -1,7 +1,7 @@
 import numpy as np
 import cPickle as pickle
 
-from model import importModel, Model
+from model import importModel, createCifarCNN, Trainer
 # load_data, load_train, 
 from prepare_data import predict
 from keras.utils import np_utils
@@ -27,7 +27,7 @@ if __name__ == '__main__':
 	# g: Keras model_from_json list indices must be integers, not str
 	model = importModel('cifar1.model')
 	
-	# ~ model = Model('cifar2.model')
+	# ~ model = Trainer('cifar2.model', createCifarCNN())
 	# ~ model.load_weights('cifar1.model.h5')
 	
 	print('[START predict]')
