@@ -50,7 +50,6 @@ def calc_zca(x):
 
 
 def save_image(x, path, normalize=True):
-    # image = train_x[:100, ]
     image = x[:100, ]
     if normalize:
         max_value = np.max(np.abs(image), axis=1).reshape((100, 1))
@@ -61,10 +60,13 @@ def save_image(x, path, normalize=True):
     image = image.transpose((0, 3, 1, 4, 2)).reshape((360, 360, 3))
     Image.fromarray(image).save(path)
 
-def main(dataset_path):
-    output_path = 'data'
+def main(dataset_path, output_path):
     raw_train_x, raw_train_y, raw_test_x, raw_test_y = load(dataset_path)
-
+    
+    # Create destination path if it does not exist
+    if not os.path.exists('output_path'):
+        os.mkdir(output_path)
+        
     labels = {'train': raw_train_y, 'test': raw_test_y}
     with open(os.path.join(output_path, 'label.pkl'), 'wb') as f:
         pickle.dump(labels, f, pickle.HIGHEST_PROTOCOL)
@@ -100,6 +102,6 @@ def main(dataset_path):
     
 
 if __name__ == '__main__':
-    # ~ dataset_path = '/root/tfplayground/datasets/cifar-10-batches-py'
-    dataset_path = '/media/cluster_files/dev/cifar/cifar-10-batches-py'
-    main(dataset_path)
+    dataset_path = '/root/tfplayground/datasets/cifar-10-batches-py'
+    # dataset_path = '/media/cluster_files/dev/cifar/cifar-10-batches-py'
+    main(dataset_path, 'data')

@@ -1,7 +1,7 @@
 import numpy as np
 import cPickle as pickle
 
-from model import createCifarCNN, createMNISTCNN, Trainer
+from model import createCifarCNN, Trainer
 from prepare_data import load_data, load_train, predict
 from keras.utils import np_utils
 

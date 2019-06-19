@@ -1,2 +1,7 @@
 # cifar10-demo-with-keras
-Realization for Jetson TK1
+Implementation for Jetson TK1
+
+
+1. Prepare dataset: `python dataset.py`
+2. Train the network `python train.py`
+
