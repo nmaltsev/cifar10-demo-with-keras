@@ -1,35 +1,21 @@
 import numpy as np
-import cPickle as pickle
+
 
 from model import createCifarCNN, Trainer
 from prepare_data import load_data, load_train, predict
-from keras.utils import np_utils
-
-from configure import configureHardware
+from libs.configure import configureHardware
+from dataset import restoreDataset 
 
 if __name__ == '__main__':
 	configureHardware(num_cores=4, num_CPU=1, num_GPU=1)
-	
-	with open('data/image_norm_zca.pkl', 'rb') as f:
-		images = pickle.load(f)
-		index = np.random.permutation(len(images['train']))
-		train_index = index[:-5000]
-		valid_index = index[-5000:]
-		train_x = images['train'][train_index].reshape((-1, 3, 32, 32))
-		valid_x = images['train'][valid_index].reshape((-1, 3, 32, 32))
-		test_x = images['test'].reshape((-1, 3, 32, 32))
 
-	with open('data/label.pkl', 'rb') as f:
-		labels = pickle.load(f)
-		train_y = labels['train'][train_index]
-		valid_y = labels['train'][valid_index]
-		valid_y = np_utils.to_categorical(valid_y)
-		test_y = labels['test']
+	train_x, train_y, valid_x, valid_y, test_x, test_y = restoreDataset()
 
 	model = Trainer(
 		'cifar1.model', 
 		createCifarCNN(),
-		batch_size=32
+		batch_size=32, 
+		nb_epoch=5
 	)
 	print('[START train]')
 	print(train_x.shape)
