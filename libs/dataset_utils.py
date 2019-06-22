@@ -89,3 +89,7 @@ def dumpDatasetWithNormalization(raw_train_x, raw_test_x, normalizationMethod, d
         normalizedData[0][:100, ], 
         imagePath_s
     )
+
+def dumpMatrix(matrix, dumpPath_s):
+    with open(dumpPath_s, 'wb') as f:
+        pickle.dump(matrix, f, pickle.HIGHEST_PROTOCOL)

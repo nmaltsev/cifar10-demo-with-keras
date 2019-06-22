@@ -157,6 +157,16 @@ class Trainer:
 			validation_data=validation_data,
 		)
 
+def compile(model):
+	model.compile(
+		loss='categorical_crossentropy',
+		optimizer=KO.Adam(lr=0.0001, epsilon=1e-8),
+		metrics=['accuracy']
+	)
+	return model
+
+def loadModel(json_s):
+	return KM.model_from_json(json_s)
 
 # https://machinelearningmastery.com/save-load-keras-deep-learning-models/
 def importModel(path_s):
