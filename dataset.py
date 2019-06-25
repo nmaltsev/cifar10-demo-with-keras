@@ -23,6 +23,7 @@ def load(data_dir):
     images, labels = zip(*train_data)
     train_images = np.concatenate(images)
     train_labels = np.concatenate(labels)
+    ## TODO refactor code
     test_data = [load_file(os.path.join(data_dir, file_name)) for file_name in test_files]
     images, labels = zip(*test_data)
     test_images = np.concatenate(images)
@@ -131,17 +132,19 @@ def prepare_dataset_chunks(slaves_n, dataset_path_s, destination_path_s):
         'data/test_chunk.pkl'
     )
 
-def restoreDatasetChunk(chankDataPath):
-
+def restoreDatasetChunk(chunk_n):
+    chankDataPath_s = 'data/train_chunk_{}.pkl'.format(chunk_n)
     ### TODO I need train_x, train_y!
-    with open(chankDataPath, 'rb') as f:
+    with open(chankDataPath_s, 'rb') as f:
         (train_chunk_x, train_chunk_y) = pickle.load(f)
         index = np.random.permutation(len(train_chunk_x))
         print('Index shape', index.shape)
-        train_index = index[:-5000]
-        valid_index = index[-5000:]
+        train_index = index[:-500]
+        # valid_index = index[-500:]
         train_x = train_chunk_x[train_index].reshape((-1, 3, 32, 32)) # [1..40000]
-        valid_x = train_chunk_x[valid_index].reshape((-1, 3, 32, 32)) # [45000...50000]
+        # valid_x = train_chunk_x[valid_index].reshape((-1, 3, 32, 32)) # [45000...50000]
+        train_y = train_chunk_y[train_index]
+        train_y = np_utils.to_categorical(train_y)
         ### test_x in data/test_chunk.pkl[0]
         # test_x = images['test'].reshape((-1, 3, 32, 32))
 
@@ -152,7 +155,8 @@ def restoreDatasetChunk(chankDataPath):
     #     valid_y = np_utils.to_categorical(valid_y)
     #     test_y = labels['test']
 
-    # return train_x, train_y, valid_x, valid_y, test_x, test_y
+    return train_x, train_y
+
 
 
 if __name__ == '__main__':

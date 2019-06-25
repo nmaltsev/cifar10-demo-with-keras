@@ -6,6 +6,7 @@ import keras.layers.convolutional as KLC
 import keras.layers.normalization as KLN
 import keras.optimizers as KO
 from keras.utils import np_utils
+from keras.preprocessing.image import ImageDataGenerator
 
 def createCifarCNN(nb_classes=10, img_row=32, img_column=32, img_channel=3):
 	m = KM.Sequential()
@@ -112,8 +113,6 @@ class Trainer:
 			print('Please set data to train model.')
 			return
 
-		from keras.preprocessing.image import ImageDataGenerator
-		
 		# This will do preprocessing and realtime data augmentation:
 		datagen = ImageDataGenerator(
 			featurewise_center=False,  # set input mean to 0 over the dataset
@@ -203,3 +202,36 @@ Reason - there is no Layers property in config. The bug while saving model!
 TODO: find on github/google model json file and compare with dumped!
 
 """
+
+
+
+def getDataGenerator(x_train):
+	# This will do preprocessing and realtime data augmentation:
+	datagen = ImageDataGenerator(
+		featurewise_center=False,  # set input mean to 0 over the dataset
+		samplewise_center=False,  # set each sample mean to 0
+		featurewise_std_normalization=False,  # divide inputs by std of the dataset
+		samplewise_std_normalization=False,  # divide each input by its std
+		zca_whitening=False,  # apply ZCA whitening
+		rotation_range=0,  # randomly rotate images in the range (degrees, 0 to 180)
+		# randomly shift images horizontally (fraction of total width)
+		width_shift_range=0.1,
+		# randomly shift images vertically (fraction of total height)
+		height_shift_range=0.1,
+		shear_range=0.,  # set range for random shear
+		zoom_range=0.,  # set range for random zoom
+		channel_shift_range=0.,  # set range for random channel shifts
+		# set mode for filling points outside the input boundaries
+		fill_mode='nearest',
+		cval=0.,  # value used for fill_mode = "constant"
+		horizontal_flip=True,  # randomly flip images
+		vertical_flip=False,  # randomly flip images
+		# set rescaling factor (applied before any other transformation)
+		rescale=None,
+	)
+
+	# Compute quantities required for feature-wise normalization
+	# (std, mean, and principal components if ZCA whitening is applied).
+	datagen.fit(x_train)
+	return datagen
+	
