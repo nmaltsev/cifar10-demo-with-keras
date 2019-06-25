@@ -128,7 +128,10 @@ def prepare_dataset_chunks(slaves_n, dataset_path_s, destination_path_s):
         )
     
     dumpMatrix(
-        (x_norm[1], raw_test_y),
+        (
+            x_norm[1], 
+            raw_test_y
+        ),
         'data/test_chunk.pkl'
     )
 
@@ -157,7 +160,14 @@ def restoreDatasetChunk(chunk_n):
 
     return train_x, train_y
 
-
+# for cluster training
+def restoreTestDataset():
+    testPath_s = 'data/test_chunk.pkl'
+    with open(testPath_s, 'rb') as f:
+        (test_x, test_y) = pickle.load(f)
+        test_x = test_x.reshape((-1, 3, 32, 32))
+        test_y = np_utils.to_categorical(test_y)
+    return test_x, test_y
 
 if __name__ == '__main__':
     if len(sys.argv) == 2 :
