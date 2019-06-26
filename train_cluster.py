@@ -11,27 +11,27 @@ from prepare_data import load_data, load_train, predict
 from libs.configure import configureHardware
 from libs.timer import Timer
 from dataset import restoreDatasetChunk, restoreTestDataset
+from keras import backend as K
 
+K.set_image_dim_ordering('tf')
 # https://stackoverflow.com/questions/21088420/mpi4py-send-recv-with-tag
 
 def average_weights(all_weights):
 	new_weights = []
 	for weights_list_tuple in zip(*all_weights):
-		# new_weights.append([np.array(weights_).mean(axis=0) for weights_ in zip(*weights_list_tuple)])
 		new_weights.append(np.array([np.array(weights_).mean(axis=0) for weights_ in zip(*weights_list_tuple)]))
 	return new_weights
 
 
 if __name__ == '__main__':
-	configureHardware(num_cores=4, num_CPU=1, num_GPU=0)
 	comm = MPI.COMM_WORLD
 	size = comm.Get_size()
 	rank = comm.Get_rank()
 	status = MPI.Status() 
+	print('START {}/{}'.format(rank, size))
+	configureHardware(num_cores=4, num_CPU=1, num_GPU=1)
 	
-
 	
-	test_path = 'data/test_x.pkl'
 	train_x, train_y = restoreDatasetChunk(rank)
 	datagen = getDataGenerator(train_x)
 
@@ -96,6 +96,15 @@ if __name__ == '__main__':
 			# TODO
 			# validation_data=validation_data,
 		)
+		"""model.fit(
+			train_x,
+			train_y,
+			batch_size=16,
+			nb_epoch=1,
+			shuffle=True
+		)"""
+		
+		
 
 		update_weights =  model.get_weights()
 		# model.save_weights('weights_r{}_e{}.h5'.format(rank,epoch))
@@ -113,18 +122,10 @@ if __name__ == '__main__':
 
 		print(rank, "Model Evaluation")
 		model.set_weights(model_weights)
-		model.save_weights('weights_r{}_e{}.h5'.format(rank, epoch_number))
+		# ~ model.save_weights('weights_r{}_e{}.h5'.format(rank, epoch_number))
 		timer.start()
 		test_x, test_y = restoreTestDataset()
-		# batch_size = 32
-		# traingen = getDataGenerator(test_x)
 
-		# print('Test_x len', len(test_x))
-
-		# score = model.evaluate_generator(
-		# 	traingen,
-		# 	len(test_x)//batch_size
-		# )
 
 		score = model.evaluate(test_x, test_y)
 

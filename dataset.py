@@ -4,7 +4,9 @@ import six
 import cPickle as pickle
 import numpy as np
 from keras.utils import np_utils
+from keras import backend as K
 
+K.set_image_dim_ordering('tf')
 from libs.dataset_utils import dumpDatasetWithNormalization, Normalization, dumpMatrix
 
 
@@ -115,7 +117,7 @@ def prepare_dataset_chunks(slaves_n, dataset_path_s, destination_path_s):
     x_norm = Normalization.subtractMean(raw_train_x, raw_test_x)
 
     # x_norm[0] is a train_x
-    # x_norm[1] is a valid_x
+    # x_norm[1] is a test_x
 
     for step in splitOnParts(len(x_norm[0]), slaves_n):
         train_x = x_norm[0][step[1] : step[2],]
@@ -124,7 +126,7 @@ def prepare_dataset_chunks(slaves_n, dataset_path_s, destination_path_s):
         print(train_x.shape, train_y.shape)
         dumpMatrix(
             (train_x, train_y),
-            'data/train_chunk_{}.pkl'.format(step[0])
+            'data/train_chunk_{}.pkl'.format(step[0]) # TODO use destination_path_s!!
         )
     
     dumpMatrix(
@@ -136,7 +138,11 @@ def prepare_dataset_chunks(slaves_n, dataset_path_s, destination_path_s):
     )
 
 def restoreDatasetChunk(chunk_n):
-    chankDataPath_s = 'data/train_chunk_{}.pkl'.format(chunk_n)
+    # TODO refactor this code!
+    
+    # ~ chankDataPath_s = 'data/train_chunk_{}.pkl'.format(chunk_n)
+    chankDataPath_s = '/media/cluster_files/dev/repo/cifar10-demo-with-keras/data/train_chunk_{}.pkl'.format(chunk_n)
+    
     ### TODO I need train_x, train_y!
     with open(chankDataPath_s, 'rb') as f:
         (train_chunk_x, train_chunk_y) = pickle.load(f)
@@ -162,7 +168,9 @@ def restoreDatasetChunk(chunk_n):
 
 # for cluster training
 def restoreTestDataset():
-    testPath_s = 'data/test_chunk.pkl'
+    # ~ testPath_s = 'data/test_chunk.pkl'
+    testPath_s = '/media/cluster_files/dev/repo/cifar10-demo-with-keras/data/test_chunk.pkl'
+    
     with open(testPath_s, 'rb') as f:
         (test_x, test_y) = pickle.load(f)
         test_x = test_x.reshape((-1, 3, 32, 32))
@@ -175,8 +183,8 @@ if __name__ == '__main__':
     else:
         workers_n = 1
     
-    dataset_path = '/root/tfplayground/datasets/cifar-10-batches-py'
-    # dataset_path = '/media/cluster_files/dev/cifar/cifar-10-batches-py'
+    # ~ dataset_path = '/root/tfplayground/datasets/cifar-10-batches-py'
+    dataset_path = '/media/cluster_files/dev/cifar/cifar-10-batches-py'
     destination_path = 'data'
     
     if workers_n == 1:
