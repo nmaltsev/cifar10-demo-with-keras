@@ -178,13 +178,15 @@ def restoreTestDataset():
     return test_x, test_y
 
 if __name__ == '__main__':
-    if len(sys.argv) == 2 :
-        workers_n = parseInt(sys.argv[1]) or 1
+    if len(sys.argv) == 3 :
+        workers_n = parseInt(sys.argv[2]) or 1
     else:
         workers_n = 1
     
-    # ~ dataset_path = '/root/tfplayground/datasets/cifar-10-batches-py'
-    dataset_path = '/media/cluster_files/dev/cifar/cifar-10-batches-py'
+    # dataset_path = '/root/tfplayground/datasets/cifar-10-batches-py'
+    # dataset_path = '/media/cluster_files/dev/cifar/cifar-10-batches-py'
+
+    dataset_path = sys.argv[1]
     destination_path = 'data'
     
     if workers_n == 1:
