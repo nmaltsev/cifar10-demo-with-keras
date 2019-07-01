@@ -44,7 +44,6 @@ def load_train():
 def predict(model, x_test, y_test):
     predict_classes = model.predict_classes(x_test)
     accuracy = [x == y for (x, y) in zip(predict_classes, y_test)]
-    print(accuracy)
     acc_rate = sum(i for i in accuracy if i) / float(len(y_test)) * 100
     print('accuracy:{}'.format(acc_rate))
 

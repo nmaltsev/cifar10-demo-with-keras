@@ -108,7 +108,7 @@ class Trainer:
 			shuffle=True
 		)
 
-	def train_gen(self, validation_data=None):
+	def train_gen(self, validation_data=None, callbacks=None):
 		if not self.prepared:
 			print('Please set data to train model.')
 			return
@@ -154,6 +154,7 @@ class Trainer:
 			len(self.x_train),
 			self.nb_epoch,
 			validation_data=validation_data,
+			callbacks=callbacks
 		)
 
 def compile(model):
