@@ -5,6 +5,8 @@ import tarfile
 import cPickle as pickle
 import numpy as np
 
+from keras.models import Sequential, Model
+
 
 def maybe_download(url, filename):
     filepath = path.join('./data', filename)
@@ -42,7 +44,10 @@ def load_train():
 
 
 def predict(model, x_test, y_test):
-    predict_classes = model.predict_classes(x_test)
+    if isinstance(model, Sequential):
+        predict_classes = model.predict_classes(x_test)
+    else:
+        predict_classes = model.predict(x_test)
     accuracy = [x == y for (x, y) in zip(predict_classes, y_test)]
     acc_rate = sum(i for i in accuracy if i) / float(len(y_test)) * 100
     print('accuracy:{}'.format(acc_rate))

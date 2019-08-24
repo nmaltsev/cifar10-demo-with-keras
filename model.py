@@ -1,5 +1,6 @@
 import os
 
+import tensorflow as tf
 import keras.models as KM
 import keras.layers as KL
 import keras.layers.convolutional as KLC
@@ -21,6 +22,7 @@ def createCifarCNN(nb_classes=10, img_row=32, img_column=32, img_channel=3):
 	m.add(KLC.MaxPooling2D(pool_size=(3, 3), strides=(2, 2), border_mode='same'))
 
 	# Posible to turn off this block
+	# with tf.device('/cpu:0'):
 	m.add(KLC.ZeroPadding2D(padding=(2, 2)))
 	m.add(KLC.Convolution2D(128, 5, 5, border_mode='valid', activation='relu'))
 	m.add(KLN.BatchNormalization())
@@ -33,25 +35,6 @@ def createCifarCNN(nb_classes=10, img_row=32, img_column=32, img_channel=3):
 	m.add(KL.Activation('relu'))
 	m.add(KL.Dense(nb_classes))
 	m.add(KL.Activation('softmax'))
-	return m
-	
-def createMNISTCNN(nb_classes=10, img_row=32, img_column=32, img_channel=3):
-	m = KM.Sequential()
-	m.add(KLC.Convolution2D(32, 5, 5, border_mode='valid', activation='relu', input_shape=(img_channel, img_row, img_column)))
-	m.add(KLC.Convolution2D(64, 3, 3, border_mode='valid', activation='relu'))
-	m.add(KLC.MaxPooling2D(pool_size=(2, 2)))
-	m.add(KL.Dropout(0.25))
-	m.add(KLC.Convolution2D(100, 5, 5, border_mode='valid', activation='relu'))
-	m.add(KL.Dropout(0.1))
-	m.add(KLC.Convolution2D(100, 5, 5, border_mode='valid', activation='relu'))
-	m.add(KL.Dropout(0.1))
-	m.add(KLC.Convolution2D(100, 3, 3, border_mode='valid', activation='relu'))
-	m.add(KL.Dropout(0.1))
-
-	m.add(KL.Flatten())
-	m.add(KL.Dense(100, activation='relu'))
-	m.add(KL.Dropout(0.1))
-	m.add(KL.Dense(nb_classes, activation='softmax'))
 	return m
 
 class Trainer:
@@ -86,7 +69,7 @@ class Trainer:
 		with open(path_s + '.json', 'w') as json_file:
 			json_file.write(model_json)
 		# serialize weights to HDF5
-		self.model.save_weights(path_s + '.h5')
+		self.model.save_weights(path_s + '.h5', overwrite=True)
 		print('Model saved to disk `%s`' % (path_s))
 
 	def train(self, validation_data=None):
@@ -189,20 +172,6 @@ def importModel(path_s):
 	
 	# score = loaded_model.evaluate(X, Y, verbose=0)
 	# print("%s: %.2f%%" % (loaded_model.metrics_names[1], score[1]*100))
-
-"""
-Input config object:
-[{u'class_name': u'ZeroPadding2D', u'config': {u'padding': [2, 2], u'batch_input_shape': [None, 3, 32, 32], u'trainable': True, u'name': u'zeropadding2d_1', u'input_dtype': u'float32'}}, {u'class_name': u'Convolution2D', u'config': {u'W_constraint': None, u'b_constraint': None, u'name': u'convolution2d_1', u'activity_regularizer': None, u'trainable': True, u'dim_ordering': u'th', u'nb_col': 5, u'subsample': [1, 1], u'init': u'glorot_uniform', u'bias': True, u'nb_filter': 64, u'b_regularizer': None, u'W_regularizer': None, u'nb_row': 5, u'activation': u'relu', u'border_mode': u'valid'}}, {u'class_name': u'BatchNormalization', u'config': {u'name': u'batchnormalization_1', u'epsilon': 1e-06, u'trainable': True, u'mode': 0, u'momentum': 0.9, u'axis': -1}}, {u'class_name': u'MaxPooling2D', u'config': {u'name': u'maxpooling2d_1', u'trainable': True, u'dim_ordering': u'th', u'pool_size': [3, 3], u'strides': [2, 2], u'border_mode': u'same'}}, {u'class_name': u'ZeroPadding2D', u'config': {u'padding': [2, 2], u'trainable': True, u'name': u'zeropadding2d_2'}}, {u'class_name': u'Convolution2D', u'config': {u'W_constraint': None, u'b_constraint': None, u'name': u'convolution2d_2', u'activity_regularizer': None, u'trainable': True, u'dim_ordering': u'th', u'nb_col': 5, u'subsample': [1, 1], u'init': u'glorot_uniform', u'bias': True, u'nb_filter': 64, u'b_regularizer': None, u'W_regularizer': None, u'nb_row': 5, u'activation': u'relu', u'border_mode': u'valid'}}, {u'class_name': u'BatchNormalization', u'config': {u'name': u'batchnormalization_2', u'epsilon': 1e-06, u'trainable': True, u'mode': 0, u'momentum': 0.9, u'axis': -1}}, {u'class_name': u'MaxPooling2D', u'config': {u'name': u'maxpooling2d_2', u'trainable': True, u'dim_ordering': u'th', u'pool_size': [3, 3], u'strides': [2, 2], u'border_mode': u'same'}}, {u'class_name': u'ZeroPadding2D', u'config': {u'padding': [2, 2], u'trainable': True, u'name': u'zeropadding2d_3'}}, {u'class_name': u'Convolution2D', u'config': {u'W_constraint': None, u'b_constraint': None, u'name': u'convolution2d_3', u'activity_regularizer': None, u'trainable': True, u'dim_ordering': u'th', u'nb_col': 5, u'subsample': [1, 1], u'init': u'glorot_uniform', u'bias': True, u'nb_filter': 128, u'b_regularizer': None, u'W_regularizer': None, u'nb_row': 5, u'activation': u'relu', u'border_mode': u'valid'}}, {u'class_name': u'BatchNormalization', u'config': {u'name': u'batchnormalization_3', u'epsilon': 1e-06, u'trainable': True, u'mode': 0, u'momentum': 0.9, u'axis': -1}}, {u'class_name': u'MaxPooling2D', u'config': {u'name': u'maxpooling2d_3', u'trainable': True, u'dim_ordering': u'th', u'pool_size': [3, 3], u'strides': [2, 2], u'border_mode': u'same'}}, {u'class_name': u'Flatten', u'config': {u'trainable': True, u'name': u'flatten_1'}}, {u'class_name': u'Dense', u'config': {u'W_constraint': None, u'b_constraint': None, u'name': u'dense_1', u'activity_regularizer': None, u'trainable': True, u'init': u'glorot_uniform', u'bias': True, u'input_dim': None, u'b_regularizer': None, u'W_regularizer': None, u'activation': u'linear', u'output_dim': 1000}}, {u'class_name': u'Dropout', u'config': {u'p': 0.25, u'trainable': True, u'name': u'dropout_1'}}, {u'class_name': u'Activation', u'config': {u'activation': u'relu', u'trainable': True, u'name': u'activation_1'}}, {u'class_name': u'Dense', u'config': {u'W_constraint': None, u'b_constraint': None, u'name': u'dense_2', u'activity_regularizer': None, u'trainable': True, u'init': u'glorot_uniform', u'bias': True, u'input_dim': None, u'b_regularizer': None, u'W_regularizer': None, u'activation': u'linear', u'output_dim': 10}}, {u'class_name': u'Activation', u'config': {u'activation': u'softmax', u'trainable': True, u'name': u'activation_2'}}]
-relative code:
-				print('CONFIG')
-				print(config)
-        for layer_data in config['layers']:
-            process_layer(layer_data)
-
-Reason - there is no Layers property in config. The bug while saving model!
-TODO: find on github/google model json file and compare with dumped!
-
-"""
 
 
 

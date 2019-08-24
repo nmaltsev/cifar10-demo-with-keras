@@ -25,7 +25,6 @@ def load(data_dir):
     images, labels = zip(*train_data)
     train_images = np.concatenate(images)
     train_labels = np.concatenate(labels)
-    ## TODO refactor code
     test_data = [load_file(os.path.join(data_dir, file_name)) for file_name in test_files]
     images, labels = zip(*test_data)
     test_images = np.concatenate(images)
@@ -34,7 +33,6 @@ def load(data_dir):
     return train_images, train_labels, test_images, test_labels
 
 def restoreDataset():
-    # path_s = 'data/image_norm_zca.pkl'
     path_s = 'data/image.pkl'
     with open(path_s, 'rb') as f:
         images = pickle.load(f)
