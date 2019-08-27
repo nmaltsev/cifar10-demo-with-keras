@@ -136,33 +136,23 @@ def prepare_dataset_chunks(slaves_n, dataset_path_s, destination_path_s):
     )
 
 def restoreDatasetChunk(chunk_n):
-    # TODO refactor this code!
     
-    # ~ chankDataPath_s = 'data/train_chunk_{}.pkl'.format(chunk_n)
-    chankDataPath_s = '/media/cluster_files/dev/repo/cifar10-demo-with-keras/data/train_chunk_{}.pkl'.format(chunk_n)
+    chankDataPath_s = 'data/train_chunk_{}.pkl'.format(chunk_n)
+    # chankDataPath_s = '/media/cluster_files/dev/repo/cifar10-demo-with-keras/data/train_chunk_{}.pkl'.format(chunk_n)
     
-    ### TODO I need train_x, train_y!
     with open(chankDataPath_s, 'rb') as f:
         (train_chunk_x, train_chunk_y) = pickle.load(f)
         index = np.random.permutation(len(train_chunk_x))
         print('Index shape', index.shape)
         train_index = index[:-500]
-        # valid_index = index[-500:]
+        valid_index = index[-500:]
         train_x = train_chunk_x[train_index].reshape((-1, 3, 32, 32)) # [1..40000]
-        # valid_x = train_chunk_x[valid_index].reshape((-1, 3, 32, 32)) # [45000...50000]
+        valid_x = train_chunk_x[valid_index].reshape((-1, 3, 32, 32)) # [45000...50000]
         train_y = train_chunk_y[train_index]
         train_y = np_utils.to_categorical(train_y)
-        ### test_x in data/test_chunk.pkl[0]
-        # test_x = images['test'].reshape((-1, 3, 32, 32))
-
-    # with open('data/label.pkl', 'rb') as f:
-    #     labels = pickle.load(f)
-    #     train_y = labels['train'][train_index]
-    #     valid_y = labels['train'][valid_index]
-    #     valid_y = np_utils.to_categorical(valid_y)
-    #     test_y = labels['test']
-
-    return train_x, train_y
+        valid_y = np_utils.to_categorical(train_chunk_y[valid_index])
+        
+    return train_x, train_y, valid_x, valid_y
 
 # for cluster training
 def restoreTestDataset():

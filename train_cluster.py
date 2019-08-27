@@ -32,7 +32,7 @@ if __name__ == '__main__':
 	configureHardware(num_cores=4, num_CPU=1, num_GPU=1)
 	
 	
-	train_x, train_y = restoreDatasetChunk(rank)
+	train_x, train_y, valid_x, valid_y = restoreDatasetChunk(rank)
 	datagen = getDataGenerator(train_x)
 
 	if rank == 0:
@@ -81,30 +81,26 @@ if __name__ == '__main__':
 	# 	model.set_weights(received_model_json)
 	# 	print('Worker: {} weights are ready'.format(rank))
 	
-	epoch_number = 2
+	epoch_number = 20
 	for epoch in range(epoch_number):
 		print('Epoch {} rank {}'.format(epoch, rank))
 
 		received_model_weights = comm.bcast(model_weights, root=0)
 		model.set_weights(received_model_weights)
-
-		model.fit_generator(
+		# TODO remove
+		# if rank == 0 and epoch > 0 :
+		# 	# Check the loss
+		# 	score = model.evaluate(test_x, test_y)
+		# 	print('Evaluation loss: {}, accuracy: {}'.format(score[0], score[1]))
+			
+		istory = model.fit_generator(
 			datagen.flow(train_x, train_y, batch_size=16),
 			len(train_x),
-			# nb_epoch=1,
-			1,
-			# TODO
-			# validation_data=validation_data,
+			1, # nb_epoch=1,
+			validation_data=(valid_x, valid_y)
 		)
-		"""model.fit(
-			train_x,
-			train_y,
-			batch_size=16,
-			nb_epoch=1,
-			shuffle=True
-		)"""
 		
-		
+		# model.fit(train_x, train_y, batch_size=16, nb_epoch=1, shuffle=True)
 
 		update_weights =  model.get_weights()
 		# model.save_weights('weights_r{}_e{}.h5'.format(rank,epoch))
@@ -114,6 +110,9 @@ if __name__ == '__main__':
 		if rank == 0:
 			print('Master received all weights {}'.format(len(all_received_weights)))
 			model_weights = average_weights(all_received_weights)
+			print('History loss: {} ({}), accuracy: {} ({})'.format(istory.history['loss'], istory.history['val_loss'], istory.history['acc'], istory.history['val_acc']))
+			if istory.history['loss'] < 1:
+				break
 	
 	if rank == 0:
 		timer.\
@@ -126,10 +125,9 @@ if __name__ == '__main__':
 		timer.start()
 		test_x, test_y = restoreTestDataset()
 
-
 		score = model.evaluate(test_x, test_y)
 
-		print('Score:')
+		print('Final score:')
 		print('Test loss:', score[0])
 		print('Test accuracy:', score[1])
 		timer.\
