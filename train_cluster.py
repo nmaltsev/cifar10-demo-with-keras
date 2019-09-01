@@ -29,7 +29,7 @@ if __name__ == '__main__':
 	rank = comm.Get_rank()
 	status = MPI.Status() 
 	print('START {}/{}'.format(rank, size))
-	configureHardware(num_cores=4, num_CPU=1, num_GPU=1)
+	configureHardware(num_cores=4, num_CPU=1, num_GPU=0)
 	
 	
 	train_x, train_y, valid_x, valid_y = restoreDatasetChunk(rank)
@@ -87,12 +87,6 @@ if __name__ == '__main__':
 
 		received_model_weights = comm.bcast(model_weights, root=0)
 		model.set_weights(received_model_weights)
-		# TODO remove
-		# if rank == 0 and epoch > 0 :
-		# 	# Check the loss
-		# 	score = model.evaluate(test_x, test_y)
-		# 	print('Evaluation loss: {}, accuracy: {}'.format(score[0], score[1]))
-			
 		istory = model.fit_generator(
 			datagen.flow(train_x, train_y, batch_size=16),
 			len(train_x),
@@ -105,13 +99,18 @@ if __name__ == '__main__':
 		update_weights =  model.get_weights()
 		# model.save_weights('weights_r{}_e{}.h5'.format(rank,epoch))
 		all_received_weights = comm.gather(update_weights, root=0)
-		print(rank, "after gather weights")
-
+		
 		if rank == 0:
 			print('Master received all weights {}'.format(len(all_received_weights)))
 			model_weights = average_weights(all_received_weights)
-			print('History loss: {} ({}), accuracy: {} ({})'.format(istory.history['loss'], istory.history['val_loss'], istory.history['acc'], istory.history['val_acc']))
-			if istory.history['loss'] < 1:
+			print('History loss: {} ({}), accuracy: {} ({})'.format(
+				istory.history['loss'][0], 
+				istory.history['val_loss'][0], 
+				istory.history['acc'][0], 
+				istory.history['val_acc'][0]
+			))
+			# The training must be stopped when the loss became less than 1
+			if istory.history['loss'][0] < 1:
 				break
 	
 	if rank == 0:
